@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Apuesta Segura</title>
+    <!-- Incluye Bootstrap CSS para un diseño responsivo y elegante -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+        .input-group-append {
+            display: flex;
+            align-items: center;
+        }
+        .seccion {
+            border-top: 1px solid #dee2e6;
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+        <div class="card p-4 w-100" style="max-width: 500px;">
+            <div class="card-body">
+                <h1 class="card-title text-center mb-4">Calculadora de Apuesta Segura</h1>
+                <p class="text-center mb-4">Introduce las cuotas de los equipos y tu inversión total para encontrar una apuesta ganadora garantizada.</p>
+                <div class="mb-3">
+                    <label for="oddsEquipoA" class="form-label">Cuotas Equipo 1</label>
+                    <input type="number" step="0.01" class="form-control" id="oddsEquipoA" placeholder="Ej: 2.0" required>
+                </div>
+                <div class="mb-3">
+                    <label for="oddsEquipoB" class="form-label">Cuotas Equipo 2</label>
+                    <input type="number" step="0.01" class="form-control" id="oddsEquipoB" placeholder="Ej: 4.0" required>
+                </div>
+                <!-- Campo opcional para el tercer resultado (Empate) -->
+                <div class="mb-3">
+                    <label for="oddsEmpate" class="form-label">Cuotas Empate (Opcional)</label>
+                    <input type="number" step="0.01" class="form-control" id="oddsEmpate" placeholder="Ej: 3.5">
+                </div>
+                <div class="mb-3">
+                    <label for="inversionTotal" class="form-label">Inversión Total ($)</label>
+                    <input type="number" step="100" class="form-control" id="inversionTotal" placeholder="Ej: 100000" required>
+                </div>
+                <button type="button" class="btn btn-primary w-100" onclick="calcularApuesta()">Calcular Apuesta Segura</button>
+                <div id="resultado" class="mt-4"></div>
+
+                <div id="seccionFe" class="seccion">
+                    <h5 class="card-title text-center mb-3">Ajustar con Factor de Fe</h5>
+                    <p class="text-center mb-3">Aumenta tu ganancia si tu equipo favorito gana. La inversión está protegida.</p>
+                    <div class="mb-3">
+                        <label for="equipoFe" class="form-label">Equipo de Fe</label>
+                        <select id="equipoFe" class="form-select">
+                            <option value="">Selecciona un equipo</option>
+                            <option value="A">Equipo 1</option>
+                            <option value="B">Equipo 2</option>
+                            <option value="C">Empate</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="factorFe" class="form-label">Factor de Fe (1-5)</label>
+                        <input type="number" min="1" max="5" step="1" class="form-control" id="factorFe" placeholder="Ej: 3">
+                    </div>
+                    <button type="button" class="btn btn-primary w-100" onclick="calcularConFe()">Calcular con Factor de Fe</button>
+                    <div id="resultadoFe" class="mt-4"></div>
+                </div>
+
+                <div id="seccionEV" class="seccion">
+                    <h5 class="card-title text-center mb-3">Calculadora de Valor Esperado (EV)</h5>
+                    <p class="text-center mb-3">Evalúa si una apuesta individual es rentable a largo plazo.</p>
+                    <div class="mb-3">
+                        <label for="cuotaEV" class="form-label">Cuota</label>
+                        <input type="number" step="0.01" class="form-control" id="cuotaEV" placeholder="Ej: 2.50" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="probabilidadEV" class="form-label">Tu Probabilidad Estimada (%)</label>
+                        <input type="number" min="0" max="100" step="1" class="form-control" id="probabilidadEV" placeholder="Ej: 45" required>
+                    </div>
+                    <button type="button" class="btn btn-primary w-100" onclick="calcularEV()">Calcular EV</button>
+                    <div id="resultadoEV" class="mt-4"></div>
+                </div>
+
+                <div id="seccionTabla" class="seccion">
+                    <h5 class="card-title text-center mb-3">Ejemplos de Apuestas Sugeridas</h5>
+                    <p class="text-center mb-3">Ajusta la inversión total para ver los resultados de diferentes escenarios de apuestas seguras.</p>
+                    <div class="mb-3">
+                        <label for="inversionTabla" class="form-label">Inversión Total para Ejemplos ($)</label>
+                        <input type="number" step="100" class="form-control" id="inversionTabla" placeholder="Ej: 100000" required>
+                    </div>
+                    <button type="button" class="btn btn-primary w-100" onclick="generarTablaApuestas()">Generar Tabla</button>
+                    <div id="resultadoTabla" class="mt-4"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Incluye el JS de Bootstrap y nuestro script -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function calcularApuesta() {
+            // Get input values
+            const oddsA = parseFloat(document.getElementById('oddsEquipoA').value);
+            const oddsB = parseFloat(document.getElementById('oddsEquipoB').value);
+            const oddsC = parseFloat(document.getElementById('oddsEmpate').value);
+            const inversionTotal = parseFloat(document.getElementById('inversionTotal').value);
+            const resultadoDiv = document.getElementById('resultado');
+            
+            // Clear previous results
+            document.getElementById('resultadoFe').innerHTML = '';
+
+            // Validate inputs
+            if (isNaN(oddsA) || isNaN(oddsB) || isNaN(inversionTotal) || oddsA <= 1 || oddsB <= 1 || inversionTotal <= 0) {
+                resultadoDiv.innerHTML = `<div class="alert alert-danger" role="alert">Por favor, ingresa cuotas e inversión válidas para al menos dos equipos. Las cuotas deben ser mayores a 1.0.</div>`;
+                return;
+            }
+
+            // Calculate implied probability
+            const probA = 1 / oddsA;
+            const probB = 1 / oddsB;
+            
+            let totalProb = probA + probB;
+            let resultados = 2; // Default number of outcomes
+
+            // Logic for 3 outcomes if 'oddsC' is a valid number
+            if (!isNaN(oddsC) && oddsC > 1) {
+                const probC = 1 / oddsC;
+                totalProb += probC;
+                resultados = 3;
+            }
+
+            // Check for surebet opportunity
+            if (totalProb >= 1) {
+                const overround = (totalProb - 1) * 100;
+                resultadoDiv.innerHTML = `<div class="alert alert-warning" role="alert">No existe una oportunidad de apuesta segura con estas cuotas. La ganancia no está garantizada. El margen de la casa de apuestas (overround) es de <strong>${overround.toFixed(2)}%</strong>.</div>`;
+                return;
+            }
+
+            // If surebet exists, calculate stake amounts
+            const apuestaA = (probA / totalProb) * inversionTotal;
+            const apuestaB = (probB / totalProb) * inversionTotal;
+            let apuestaC = 0;
+            if (resultados === 3) {
+                const probC = 1 / oddsC;
+                apuestaC = (probC / totalProb) * inversionTotal;
+            }
+
+            // Calculate guaranteed return and profit margin
+            const retornoGarantizado = (apuestaA * oddsA);
+            const ganancia = retornoGarantizado - inversionTotal;
+            const margenGanancia = (ganancia / inversionTotal) * 100;
+
+            // Display results
+            let listaApuestas = `
+                <ul>
+                    <li><strong>$${apuestaA.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</strong> al Equipo 1 (Cuota ${oddsA})</li>
+                    <li><strong>$${apuestaB.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</strong> al Equipo 2 (Cuota ${oddsB})</li>
+            `;
+            if (resultados === 3) {
+                listaApuestas += `<li><strong>$${apuestaC.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</strong> al Empate (Cuota ${oddsC})</li>`;
+            }
+            listaApuestas += `</ul>`;
+
+            resultadoDiv.innerHTML = `
+                <div class="alert alert-success" role="alert">
+                    <h5 class="alert-heading">¡Apuesta Segura Encontrada!</h5>
+                    <p><strong>Margen de Ganancia: ${margenGanancia.toFixed(2)}%</strong></p>
+                    <p>Para una inversión total de <strong>$${inversionTotal.toLocaleString('es-CO')}</strong>, debes apostar:</p>
+                    ${listaApuestas}
+                    <hr>
+                    <p class="mb-0">Tu retorno garantizado será de <strong>$${retornoGarantizado.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</strong>, sin importar el resultado.</p>
+                    <p class="mb-0">Esto representa una ganancia segura de <strong>$${ganancia.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</strong>.</p>
+                </div>
+            `;
+        }
+
+        function calcularConFe() {
+            // Get input values
+            const oddsA = parseFloat(document.getElementById('oddsEquipoA').value);
+            const oddsB = parseFloat(document.getElementById('oddsEquipoB').value);
+            const oddsC = parseFloat(document.getElementById('oddsEmpate').value);
+            const inversionTotal = parseFloat(document.getElementById('inversionTotal').value);
+            const equipoFe = document.getElementById('equipoFe').value;
+            const factorFe = parseFloat(document.getElementById('factorFe').value);
+            const resultadoFeDiv = document.getElementById('resultadoFe');
+
+            // Clear previous results
+            document.getElementById('resultado').innerHTML = '';
+
+            // Validate inputs
+            if (isNaN(oddsA) || isNaN(oddsB) || isNaN(inversionTotal) || oddsA <= 1 || oddsB <= 1 || inversionTotal <= 0 || !equipoFe || isNaN(factorFe) || factorFe < 1 || factorFe > 5) {
+                resultadoFeDiv.innerHTML = `<div class="alert alert-danger" role="alert">Por favor, ingresa cuotas e inversión válidas y selecciona un equipo y factor de fe (1-5).</div>`;
+                return;
+            }
+
+            // Check for surebet opportunity first
+            const probA = 1 / oddsA;
+            const probB = 1 / oddsB;
+            let totalProb = probA + probB;
+            if (!isNaN(oddsC) && oddsC > 1) {
+                totalProb += 1 / oddsC;
+            }
+
+            if (totalProb >= 1) {
+                resultadoFeDiv.innerHTML = `<div class="alert alert-warning" role="alert">No existe una oportunidad de apuesta segura con estas cuotas. No se puede aplicar el factor de fe.</div>`;
+                return;
+            }
+
+            // Calculate pure surebet stakes
+            const surebetPortion = 1 / totalProb;
+            const pureStakeA = probA * surebetPortion * inversionTotal;
+            const pureStakeB = probB * surebetPortion * inversionTotal;
+            const pureStakeC = isNaN(oddsC) ? 0 : (1 / oddsC) * surebetPortion * inversionTotal;
+
+            // Calculate the total profit from a pure surebet
+            const surebetProfit = (inversionTotal / totalProb) - inversionTotal;
+
+            // Calculate stakes for a 'no-loss' scenario (where non-favored teams return exactly the total investment)
+            const noLossStakeA = inversionTotal / oddsA;
+            const noLossStakeB = inversionTotal / oddsB;
+            const noLossStakeC = isNaN(oddsC) ? 0 : inversionTotal / oddsC;
+
+            // Use the faith factor to blend between pure surebet and the aggressive 'no-loss' strategy
+            const faithFactorNormalized = factorFe / 5;
+            let apuestaA, apuestaB, apuestaC;
+
+            if (equipoFe === 'A') {
+                apuestaA = pureStakeA * (1 - faithFactorNormalized) + (inversionTotal - (inversionTotal - (noLossStakeB + noLossStakeC))) * faithFactorNormalized;
+                apuestaB = pureStakeB * (1 - faithFactorNormalized) + noLossStakeB * faithFactorNormalized;
+                apuestaC = isNaN(oddsC) ? 0 : pureStakeC * (1 - faithFactorNormalized) + noLossStakeC * faithFactorNormalized;
+            } else if (equipoFe === 'B') {
+                apuestaA = pureStakeA * (1 - faithFactorNormalized) + noLossStakeA * faithFactorNormalized;
+                apuestaB = pureStakeB * (1 - faithFactorNormalized) + (inversionTotal - (noLossStakeA + noLossStakeC)) * faithFactorNormalized;
+                apuestaC = isNaN(oddsC) ? 0 : pureStakeC * (1 - faithFactorNormalized) + noLossStakeC * faithFactorNormalized;
+            } else if (equipoFe === 'C') {
+                apuestaA = pureStakeA * (1 - faithFactorNormalized) + noLossStakeA * faithFactorNormalized;
+                apuestaB = pureStakeB * (1 - faithFactorNormalized) + noLossStakeB * faithFactorNormalized;
+                apuestaC = pureStakeC * (1 - faithFactorNormalized) + (inversionTotal - (noLossStakeA + noLossStakeB)) * faithFactorNormalized;
+            }
+
+
+            // Calculate returns for each scenario
+            const retornoA = apuestaA * oddsA;
+            const gananciaA = retornoA - inversionTotal;
+
+            const retornoB = apuestaB * oddsB;
+            const gananciaB = retornoB - inversionTotal;
+
+            let retornoC = 0, gananciaC = 0;
+            if (!isNaN(oddsC)) {
+                retornoC = apuestaC * oddsC;
+                gananciaC = retornoC - inversionTotal;
+            }
+
+            // Display results
+            let listaApuestas = `
+                <ul>
+                    <li><strong>$${apuestaA.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</strong> al Equipo 1 (Cuota ${oddsA})</li>
+                    <li><strong>$${apuestaB.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</strong> al Equipo 2 (Cuota ${oddsB})</li>
+            `;
+            if (!isNaN(oddsC)) {
+                listaApuestas += `<li><strong>$${apuestaC.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</strong> al Empate (Cuota ${oddsC})</li>`;
+            }
+            listaApuestas += `</ul>`;
+
+            let resultadosDetallados = `
+                <h6 class="mt-4">Retornos Potenciales:</h6>
+                <ul>
+                    <li>Si gana el <strong>Equipo 1</strong>: recibirás <strong>$${retornoA.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</strong> para una ganancia de <strong>$${gananciaA.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</strong>.</li>
+                    <li>Si gana el <strong>Equipo 2</strong>: recibirás <strong>$${retornoB.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</strong> para una ganancia de <strong>$${gananciaB.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</strong>.</li>
+            `;
+            if (!isNaN(oddsC)) {
+                resultadosDetallados += `<li>Si hay <strong>Empate</strong>: recibirás <strong>$${retornoC.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</strong> para una ganancia de <strong>$${gananciaC.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</strong>.</li>`;
+            }
+            resultadosDetallados += `</ul>`;
+
+            resultadoFeDiv.innerHTML = `
+                <div class="alert alert-success" role="alert">
+                    <h5 class="alert-heading">¡Apuesta Ajustada por Fe!</h5>
+                    <p>Con un factor de fe de <strong>${factorFe}</strong>, tu ganancia potencial ha sido concentrada en el <strong>${equipoFe === 'A' ? 'Equipo 1' : equipoFe === 'B' ? 'Equipo 2' : 'Empate'}</strong>.</p>
+                    <p>Para una inversión total de <strong>$${inversionTotal.toLocaleString('es-CO')}</strong>, debes apostar:</p>
+                    ${listaApuestas}
+                    <hr>
+                    ${resultadosDetallados}
+                </div>
+            `;
+        }
+        
+        function calcularEV() {
+            const cuotaEV = parseFloat(document.getElementById('cuotaEV').value);
+            const probabilidadEV = parseFloat(document.getElementById('probabilidadEV').value);
+            const resultadoEVDiv = document.getElementById('resultadoEV');
+            
+            // Validate inputs
+            if (isNaN(cuotaEV) || isNaN(probabilidadEV) || cuotaEV <= 1 || probabilidadEV < 0 || probabilidadEV > 100) {
+                resultadoEVDiv.innerHTML = `<div class="alert alert-danger" role="alert">Por favor, ingresa una cuota válida y una probabilidad entre 0 y 100%.</div>`;
+                return;
+            }
+            
+            // Convert probability to decimal
+            const probDecimal = probabilidadEV / 100;
+            
+            // Calculate Expected Value for a $1 stake
+            const ev = (probDecimal * cuotaEV) - 1;
+            
+            let mensaje = '';
+            if (ev > 0) {
+                mensaje = `<p>El Valor Esperado es de <strong>$${ev.toFixed(2)}</strong> por cada $1 apostado. Esta es una <strong>apuesta de valor positivo</strong> y es rentable a largo plazo.</p>`;
+            } else if (ev < 0) {
+                mensaje = `<p>El Valor Esperado es de <strong>$${ev.toFixed(2)}</strong> por cada $1 apostado. Esta es una <strong>apuesta de valor negativo</strong> y no es rentable a largo plazo.</p>`;
+            } else {
+                mensaje = `<p>El Valor Esperado es de <strong>$${ev.toFixed(2)}</strong> por cada $1 apostado. Esta es una <strong>apuesta justa</strong>, ni rentable ni perdedora a largo plazo.</p>`;
+            }
+            
+            resultadoEVDiv.innerHTML = `
+                <div class="alert alert-info" role="alert">
+                    <h5 class="alert-heading">Resultado del Valor Esperado</h5>
+                    <p>Tu probabilidad estimada: ${probabilidadEV}%</p>
+                    <p>Probabilidad implícita de la cuota: ${(1/cuotaEV*100).toFixed(2)}%</p>
+                    <hr>
+                    ${mensaje}
+                </div>
+            `;
+        }
+
+        function generarTablaApuestas() {
+            const inversionTotal = parseFloat(document.getElementById('inversionTabla').value);
+            const resultadoTablaDiv = document.getElementById('resultadoTabla');
+
+            if (isNaN(inversionTotal) || inversionTotal <= 0) {
+                resultadoTablaDiv.innerHTML = `<div class="alert alert-danger" role="alert">Por favor, ingresa una inversión total válida para generar la tabla.</div>`;
+                return;
+            }
+
+            // Datos de apuestas seguras pre-quemados, solo 2 vías
+            const escenarios = [
+                // Mejores apuestas (margen de ganancia > 1%)
+                { odds: [2.0, 2.06] },
+                { odds: [1.80, 2.30] },
+                { odds: [2.0, 4.50] },
+                { odds: [1.95, 2.15] },
+                { odds: [2.20, 2.40] },
+                // Apuestas a evitar (margen de ganancia muy bajo o negativo)
+                { odds: [1.90, 2.10] },
+                { odds: [1.85, 2.20] },
+                { odds: [1.95, 2.05] }
+            ];
+
+            const mejoresApuestas = escenarios.filter(escenario => {
+                const totalProb = escenario.odds.reduce((sum, odd) => sum + (1 / odd), 0);
+                if (totalProb >= 1) return false;
+                const gananciaNeta = (inversionTotal / totalProb) - inversionTotal;
+                return gananciaNeta > 0.01 * inversionTotal; // Margen > 1%
+            });
+
+            const apuestasAEvitar = escenarios.filter(escenario => {
+                const totalProb = escenario.odds.reduce((sum, odd) => sum + (1 / odd), 0);
+                if (totalProb < 1) {
+                    const gananciaNeta = (inversionTotal / totalProb) - inversionTotal;
+                    return gananciaNeta <= 0.01 * inversionTotal;
+                }
+                return totalProb >= 1;
+            });
+
+            let tablaHTML = '';
+
+            const generarTabla = (titulo, datos) => {
+                if (datos.length === 0) return '';
+                let html = `
+                    <h6 class="mt-4">${titulo}</h6>
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Cuotas</th>
+                                <th>Inversión</th>
+                                <th>Apuesta 1</th>
+                                <th>Apuesta 2</th>
+                                <th>Margen %</th>
+                                <th>Retorno</th>
+                                <th>Ganancia Neta</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                datos.forEach(escenario => {
+                    const totalProb = escenario.odds.reduce((sum, odd) => sum + (1 / odd), 0);
+                    const apuestas = [];
+                    
+                    if (totalProb < 1) {
+                        escenario.odds.forEach(odd => {
+                            const apuesta = (1 / odd) * (inversionTotal / totalProb);
+                            apuestas.push(apuesta);
+                        });
+                    }
+                    
+                    const retornoGarantizado = totalProb < 1 ? (apuestas[0] * escenario.odds[0]) : inversionTotal;
+                    const gananciaNeta = retornoGarantizado - inversionTotal;
+                    const margenGanancia = (gananciaNeta / inversionTotal) * 100;
+
+                    html += `<tr>`;
+                    html += `<td>${escenario.odds.join(' / ')}</td>`;
+                    html += `<td>$${inversionTotal.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</td>`;
+                    if (totalProb < 1) {
+                        apuestas.forEach(apuesta => {
+                            html += `<td>$${apuesta.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</td>`;
+                        });
+                    } else {
+                        html += `<td>-</td><td>-</td>`;
+                    }
+                    
+                    html += `<td>${totalProb < 1 ? margenGanancia.toFixed(2) : ((totalProb - 1) * 100).toFixed(2)}%</td>`;
+                    html += `<td>$${retornoGarantizado.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</td>`;
+                    html += `<td>$${gananciaNeta.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</td>`;
+                    html += `</tr>`;
+                });
+                html += `
+                        </tbody>
+                    </table>
+                `;
+                return html;
+            };
+
+            tablaHTML += generarTabla('Mejores Apuestas Seguras', mejoresApuestas);
+            tablaHTML += generarTabla('Apuestas a Evitar', apuestasAEvitar);
+
+            if (mejoresApuestas.length === 0 && apuestasAEvitar.length === 0) {
+                 resultadoTablaDiv.innerHTML = `<div class="alert alert-info" role="alert">No hay escenarios predefinidos para la inversión total seleccionada.</div>`;
+            } else {
+                resultadoTablaDiv.innerHTML = tablaHTML;
+            }
+        }
+    </script>
+</body>
+</html>
